@@ -1,0 +1,48 @@
+name: flutter_detector
+description: Flutter application with possible way of TFLite models usage on heavy camera streams
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.3
+
+  # architecture
+  flutter_bloc: ^6.0.1
+  provider: ^4.3.2+1
+  equatable: ^1.2.3
+  # detector
+  path_provider: ^1.6.11
+  tflite: ^1.1.1
+  # camera and image transformation
+  camera: ^0.5.8+5
+  exif: ^1.0.3
+  image: ^2.1.14
+  # lifecycle and permissions
+  wakelock: ^0.1.4+2
+  permission_handler: ^5.0.1+1
+  # UI
+  flushbar: ^1.10.4
+
+  # custom fixed exif rotation plugin
+  flutter_exif_rotation:
+    git:
+      url: git://github.com/VadPinchuk/flutter_exif_rotation.git
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/
