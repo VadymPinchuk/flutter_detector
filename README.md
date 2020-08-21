@@ -1,16 +1,9 @@
-# flutter_detector
+# Flutter TFLite Detector application
 
 Flutter application with possible way of TFLite models usage on heavy camera streams
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Nice stuff used
+- BLoC architecture - nice event driven pattern
+- TFLite with custom models
+- EXIF for proper image rotation
+- Camera - for image stream, but while it is really heavy for processing - frame picking approach used 
