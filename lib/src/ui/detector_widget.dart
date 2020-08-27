@@ -32,6 +32,7 @@ class _DetectorWidgetState extends State<DetectorWidget> {
   void initState() {
     super.initState();
     imageCache = ListQueue();
+    context.bloc<DetectorBloc>().add(InitialiseDetectorEvent());
     initDirectory();
   }
 
@@ -58,7 +59,7 @@ class _DetectorWidgetState extends State<DetectorWidget> {
             child: BlocListener<CropperBloc, CropperState>(
               listenWhen: (_, state) => state is CroppSuccessState,
               listener: (_, state) =>
-                  showMessage('${(state as CroppSuccessState).crops.length} cropped image(s) saved'),
+                  showMessage('Objects cropped', '${(state as CroppSuccessState).crops.length} image(s) saved'),
               child: BlocBuilder<CamerasBloc, CamerasState>(
                 builder: (_, camState) {
                   if (camState is NoCamerasAvailableState) {
@@ -128,8 +129,8 @@ class _DetectorWidgetState extends State<DetectorWidget> {
     }
   }
 
-  void showMessage(String message) => Flushbar<dynamic>(
-        title: 'Objects cropped',
+  void showMessage(String title, String message) => Flushbar<dynamic>(
+        title: title,
         message: message,
         borderRadius: 12.0,
         margin: const EdgeInsets.all(8.0),
@@ -155,7 +156,7 @@ class _DetectorWidgetState extends State<DetectorWidget> {
         setState(() {});
       }
       if (controller.value.hasError) {
-        showMessage('Camera error ${controller.value.errorDescription}');
+        showMessage('Camera error', controller.value.errorDescription);
       }
     });
 
@@ -172,7 +173,7 @@ class _DetectorWidgetState extends State<DetectorWidget> {
 
   void startCapturing() {
     if (context.bloc<DetectorBloc>().state is DetectorLoadingErrorState) {
-      showMessage('Model not loaded');
+      showMessage('TFLite error', 'Model not loaded');
       return;
     }
     fetchFrame.then(
@@ -220,7 +221,7 @@ class _DetectorWidgetState extends State<DetectorWidget> {
 
   void _showCameraException(CameraException e) {
     logError(e.code, e.description);
-    showMessage('Error: ${e.code}\n${e.description}');
+    showMessage('Error: ${e.code}', e.description);
   }
 
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();

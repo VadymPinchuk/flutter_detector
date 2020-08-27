@@ -11,13 +11,11 @@ import 'package:meta/meta.dart';
 /// Object detector on provided image
 /// Responsible for models loading and detections itself
 class DetectorBloc extends Bloc<DetectorEvent, DetectorState> {
-  DetectorBloc() : super(DetectorLoadingSuccessState()) {
-    add(InitializeDetectorEvent());
-  }
+  DetectorBloc() : super(DetectorLoadingSuccessState());
 
   @override
   Stream<DetectorState> mapEventToState(DetectorEvent event) async* {
-    if (event is InitializeDetectorEvent) {
+    if (event is InitialiseDetectorEvent) {
       if (state is! DetectorLoadingState) {
         yield DetectorLoadingState();
         try {
@@ -34,13 +32,8 @@ class DetectorBloc extends Bloc<DetectorEvent, DetectorState> {
         return;
       }
       yield DetectionInProgressState();
-      try {
-        final value = await Utils.detectObjects(event.imagePath);
-        yield DetectedObjectsState(value);
-      } catch (e) {
-        print(e);
-        yield DetectedObjectsState(<dynamic>[]);
-      }
+      final value = await Utils.detectObjects(event.imagePath);
+      yield DetectedObjectsState(value);
       return;
     }
   }
@@ -87,7 +80,7 @@ abstract class DetectorEvent {
   const DetectorEvent();
 }
 
-class InitializeDetectorEvent extends DetectorEvent {}
+class InitialiseDetectorEvent extends DetectorEvent {}
 
 class DetectObjectsEvent extends DetectorEvent {
   const DetectObjectsEvent(this.imagePath);

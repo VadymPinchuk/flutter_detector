@@ -28,7 +28,7 @@ class BoxesOverlay extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(5.0),
                     decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
+                      borderRadius: const BorderRadius.all(Radius.circular(8.0)),
                       border: Border.all(
                         color: Colors.teal,
                         width: 2,

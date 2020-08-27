@@ -5,7 +5,6 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:exif/exif.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_detector/src/models/decode_params.dart';
 import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
@@ -22,14 +21,6 @@ typedef CutOffCallback = void Function();
 // ignore: avoid_classes_with_only_static_members
 /// Utils class with access to model loading, label detection, etc.
 class Utils {
-  static const MethodChannel _channel = MethodChannel('detector');
-
-  // FIXME: sample of cross-platform method calls. not used
-  static Future<String> get platformVersion async {
-    final String version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
-  }
-
   /// Initialize detector with provided models
   static Future<String> initializeDetector({String model, String labels}) async => Tflite.loadModel(
         model: model ?? 'assets/ssd_mobilenet.tflite',
@@ -37,6 +28,7 @@ class Utils {
         numThreads: 2,
       );
 
+  /// Release memory
   static Future<dynamic> release() => Tflite.close();
 
   /// Detect objects on image
@@ -46,7 +38,7 @@ class Utils {
     return FlutterExifRotation.rotateImage(path: imagePath)
         .then((file) => Tflite.detectObjectOnImage(
               path: file.path,
-              threshold: 0.5,
+              threshold: 0.3,
             ))
         .then<List<dynamic>>(
       (List<dynamic> recognitions) {
