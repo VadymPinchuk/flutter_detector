@@ -59,7 +59,7 @@ class Utils {
     param.sendPort.send(
       param.boxes
           .map((dynamic box) => _scaleBox(box, param.preview))
-          .map((List<int> box) => _copyCrop(
+          .map((List<int> box) => _copyCropp(
                 picture,
                 box[0],
                 box[1],
@@ -75,7 +75,7 @@ class Utils {
   }
 
   /// Crop and return cropped image
-  static image.Image _copyCrop(image.Image src, int x, int y, int w, int h) {
+  static image.Image _copyCropp(image.Image src, int x, int y, int w, int h) {
     final image.Image dst = image.Image(w, h, channels: src.channels, exif: src.exif, iccp: src.iccProfile);
 
     for (var yi = 0, sy = y; yi < h; ++yi, ++sy) {
