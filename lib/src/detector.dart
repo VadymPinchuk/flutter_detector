@@ -18,21 +18,26 @@ const String ROTATION_KEY = 'Image Orientation';
 typedef DetectionCallback = void Function(List<dynamic> list);
 typedef CutOffCallback = void Function();
 
-// ignore: avoid_classes_with_only_static_members
-/// Utils class with access to model loading, label detection, etc.
-class Utils {
+/// Class with access to model loading, label detection, etc.
+class Detector {
+  factory Detector() => _instance;
+
+  Detector._internal();
+
+  static final Detector _instance = Detector._internal();
+
   /// Initialize detector with provided models
-  static Future<String> initializeDetector({String model, String labels}) async => Tflite.loadModel(
+  Future<String> initializeDetector({String model, String labels}) async => Tflite.loadModel(
         model: model ?? 'assets/ssd_mobilenet.tflite',
         labels: labels ?? 'assets/ssd_mobilenet.txt',
         numThreads: 2,
       );
 
   /// Release memory
-  static Future<dynamic> release() => Tflite.close();
+  Future<dynamic> release() => Tflite.close();
 
   /// Detect objects on image
-  static Future<List<dynamic>> detectObjects(String imagePath) async {
+  Future<List<dynamic>> detectObjects(String imagePath) async {
     final int startTime = DateTime.now().millisecondsSinceEpoch;
 
     return FlutterExifRotation.rotateImage(path: imagePath)
@@ -50,7 +55,7 @@ class Utils {
   }
 
   /// Cropping task in a separate isolate
-  static Future<dynamic> croppObjects(DecodeParam param) => Isolate.spawn(_readAndCropp, param);
+  Future<dynamic> croppObjects(DecodeParam param) => Isolate.spawn(_readAndCropp, param);
 
   /// Read image from path and crop all boxes from it
   static Future<dynamic> _readAndCropp(DecodeParam param) async {

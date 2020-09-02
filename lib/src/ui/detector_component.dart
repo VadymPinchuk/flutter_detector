@@ -6,8 +6,8 @@ import 'package:flutter_detector/src/bloc/cropper/cropper_bloc.dart';
 import 'package:flutter_detector/src/bloc/detector/detector_bloc.dart';
 import 'package:flutter_detector/src/bloc/lifecycle/lifecycle_bloc.dart';
 import 'package:flutter_detector/src/bloc/permissions/permissions_bloc.dart';
+import 'package:flutter_detector/src/detector.dart';
 import 'package:flutter_detector/src/ui/detector_widget.dart';
-import 'package:flutter_detector/src/utils.dart';
 import 'package:wakelock/wakelock.dart';
 
 // Hardcoded app bar height. Need to be taken into account while detected labels are drawn on the screen.
@@ -24,6 +24,7 @@ class VisorComponent extends StatefulWidget {
 class _VisorComponentState extends State<VisorComponent> {
   PermissionsBloc permissionsBloc;
   LifecycleBloc lifecycleBloc;
+  Detector detector;
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -35,13 +36,14 @@ class _VisorComponentState extends State<VisorComponent> {
     Wakelock.enable();
     permissionsBloc = PermissionsBloc();
     lifecycleBloc = LifecycleBloc();
+    detector = Detector();
   }
 
   @override
   void dispose() {
     Wakelock.disable();
     lifecycleBloc.dispose();
-    Utils.release();
+    detector.release();
     super.dispose();
   }
 
@@ -62,8 +64,8 @@ class _VisorComponentState extends State<VisorComponent> {
                   builder: (_, permissions) => permissions is PermissionsGrantedState
                       ? MultiBlocProvider(
                           providers: [
-                            BlocProvider<DetectorBloc>(create: (_) => DetectorBloc()),
-                            BlocProvider<CropperBloc>(create: (_) => CropperBloc()),
+                            BlocProvider<DetectorBloc>(create: (_) => DetectorBloc(detector)),
+                            BlocProvider<CropperBloc>(create: (_) => CropperBloc(detector)),
                           ],
                           child: DetectorWidget(),
                         )

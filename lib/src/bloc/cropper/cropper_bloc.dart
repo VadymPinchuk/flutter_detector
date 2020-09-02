@@ -4,8 +4,8 @@ import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_detector/src/detector.dart';
 import 'package:flutter_detector/src/models/decode_params.dart';
-import 'package:flutter_detector/src/utils.dart';
 import 'package:meta/meta.dart';
 
 part 'cropper_event.dart';
@@ -13,7 +13,8 @@ part 'cropper_state.dart';
 
 /// BLoC responsible for cropping detected labels from image
 class CropperBloc extends Bloc<CropperEvent, CropperState> {
-  CropperBloc() : super(InitialCropperState());
+  CropperBloc(this._detector) : super(InitialCropperState());
+  final Detector _detector;
 
   @override
   Stream<CropperState> mapEventToState(CropperEvent event) async* {
@@ -39,7 +40,7 @@ class CropperBloc extends Bloc<CropperEvent, CropperState> {
           dataState.boxes,
           receivePort.sendPort,
         );
-        await Utils.croppObjects(param);
+        await _detector.croppObjects(param);
         yield CroppSuccessState(await receivePort.first as List<String>);
       }
     }

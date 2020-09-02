@@ -12,9 +12,9 @@ import 'package:flutter_detector/src/bloc/cameras/cameras_bloc.dart';
 import 'package:flutter_detector/src/bloc/cropper/cropper_bloc.dart';
 import 'package:flutter_detector/src/bloc/detector/detector_bloc.dart';
 import 'package:flutter_detector/src/bloc/lifecycle/lifecycle_bloc.dart';
+import 'package:flutter_detector/src/detector.dart';
 import 'package:flutter_detector/src/ui/boxes_overlay.dart';
 import 'package:flutter_detector/src/ui/detector_component.dart';
-import 'package:flutter_detector/src/utils.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DetectorWidget extends StatefulWidget {
@@ -184,7 +184,7 @@ class _DetectorWidgetState extends State<DetectorWidget> {
         try {
           // this is needed because of bug in camera plugin
           // https://github.com/flutter/flutter/issues/49420
-          imageSize ??= await Utils.getImageSize(filePath);
+          imageSize ??= await Detector.getImageSize(filePath);
 
           context.bloc<DetectorBloc>().add(DetectObjectsEvent(filePath));
         } catch (e) {

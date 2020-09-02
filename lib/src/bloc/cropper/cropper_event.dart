@@ -10,8 +10,6 @@ class LastImageDataEvent extends CropperEvent {
   final String imagePath;
   final Size imageSize;
   final List<dynamic> boxes;
-  @override
-  String toString() => boxes.toString();
 }
 
 class CroppImageEvent extends CropperEvent {}
