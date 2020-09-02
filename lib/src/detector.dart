@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:exif/exif.dart';
+import 'package:firebase_ml_custom/firebase_ml_custom.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_detector/src/models/decode_params.dart';
 import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:image/image.dart' as image;
+import 'package:path_provider/path_provider.dart';
 import 'package:tflite/tflite.dart';
 
 const String WIDTH_KEY = 'EXIF ExifImageWidth';
@@ -27,11 +31,65 @@ class Detector {
   static final Detector _instance = Detector._internal();
 
   /// Initialize detector with provided models
-  Future<String> initializeDetector({String model, String labels}) async => Tflite.loadModel(
-        model: model ?? 'assets/ssd_mobilenet.tflite',
-        labels: labels ?? 'assets/ssd_mobilenet.txt',
-        numThreads: 2,
-      );
+  /// Gets the model ready for inference on images.
+  Future<String> initializeDetector({String model, String labels}) async {
+    final modelFile = await _loadModelFromFirebase(model);
+    return await loadTFLiteModel(modelFile, labels);
+  }
+
+  /// Downloads custom model from the Firebase console and return its file.
+  /// located on the mobile device.
+  Future<File> _loadModelFromFirebase([String modelName]) async {
+    try {
+      // Create model with a name that is specified in the Firebase console
+      final model = FirebaseCustomRemoteModel(modelName ?? 'ssd_mobilenet');
+
+      // Specify conditions when the model can be downloaded.
+      // If there is no wifi access when the app is started,
+      // this app will continue loading until the conditions are satisfied.
+      final conditions = FirebaseModelDownloadConditions(androidRequireWifi: true, iosAllowCellularAccess: false);
+
+      // Create model manager associated with default Firebase App instance.
+      final modelManager = FirebaseModelManager.instance;
+
+      // Begin downloading and wait until the model is downloaded successfully.
+      await modelManager.download(model, conditions);
+      assert(await modelManager.isModelDownloaded(model) == true);
+
+      // Get latest model file to use it for inference by the interpreter.
+      final modelFile = await modelManager.getLatestModelFile(model);
+      assert(modelFile != null);
+      return modelFile;
+    } catch (exception) {
+      print('Failed on loading your model from Firebase: $exception');
+      print('The program will not be resumed');
+      rethrow;
+    }
+  }
+
+  /// Loads the model into some TF Lite interpreter.
+  /// In this case interpreter provided by tflite plugin.
+  Future<String> loadTFLiteModel(File modelFile, [String labelsName]) async {
+    try {
+      final appDirectory = await getApplicationDocumentsDirectory();
+      final labelsData = await rootBundle.load(labelsName ?? 'assets/ssd_mobilenet.txt');
+      final labelsFile = await File(appDirectory.path + '/ssd_mobilenet.txt')
+          .writeAsBytes(labelsData.buffer.asUint8List(labelsData.offsetInBytes, labelsData.lengthInBytes));
+
+      assert(await Tflite.loadModel(
+            model: modelFile.path,
+            labels: labelsFile.path,
+            numThreads: 2,
+            isAsset: false,
+          ) ==
+          'success');
+      return 'Model is loaded';
+    } catch (exception) {
+      print('Failed on loading your model to the TFLite interpreter: $exception');
+      print('The program will not be resumed');
+      rethrow;
+    }
+  }
 
   /// Release memory
   Future<dynamic> release() => Tflite.close();

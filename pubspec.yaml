@@ -21,6 +21,7 @@ dependencies:
   # detector
   path_provider: ^1.6.14
   tflite: ^1.1.1
+  firebase_ml_custom: ^0.0.2
   # camera and image transformation
   camera: ^0.5.8+5
   exif: ^1.0.3
