@@ -33,16 +33,35 @@ class Detector {
   /// Initialize detector with provided models
   /// Gets the model ready for inference on images.
   Future<String> initializeDetector({String model, String labels}) async {
-    final modelFile = await _loadModelFromFirebase(model);
+    final String modelName = model ?? 'ssd_mobilenet';
+    // create model dir in app's data folder
+    final Directory appDocDir = await getTemporaryDirectory();
+    final Directory modelDir = Directory('${appDocDir.path}/models');
+
+    final File modelFile = await _getModel(modelDir, modelName);
     return await loadTFLiteModel(modelFile, labels);
+  }
+
+  Future<io.File> _getModel(Directory modelDir, String modelName) async {
+    final String filePath = '${modelDir.path}/$modelName.tflite';
+    final File modFile = File(filePath);
+    if (modelDir.existsSync() && modFile.existsSync()) {
+      return modFile;
+    } else {
+      modelDir.createSync();
+      print('Using dir ${modelDir.path} for storing models');
+      final File modelFile = await _loadModelFromFirebase(modelName);
+      modFile.writeAsBytes(await modelFile.readAsBytes().then((value) => value.toList()));
+      return modelFile;
+    }
   }
 
   /// Downloads custom model from the Firebase console and return its file.
   /// located on the mobile device.
-  Future<File> _loadModelFromFirebase([String modelName]) async {
+  Future<File> _loadModelFromFirebase(String modelName) async {
     try {
       // Create model with a name that is specified in the Firebase console
-      final model = FirebaseCustomRemoteModel(modelName ?? 'ssd_mobilenet');
+      final model = FirebaseCustomRemoteModel(modelName);
 
       // Specify conditions when the model can be downloaded.
       // If there is no wifi access when the app is started,
